@@ -118,6 +118,8 @@ output.css
 # Terraform state files (לא לשמור בגיט!)
 *.tfstate
 *.tfstate.*
+secrets.auto.tfvars
+*.auto.tfvars
 
 # Terraform plan files
 *.tfplan
