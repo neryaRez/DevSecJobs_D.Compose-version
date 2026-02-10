@@ -1,0 +1,35 @@
+# python caches
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+
+# virtual envs
+.venv
+venv
+env
+
+# logs
+*.log
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# tooling / editors
+.vscode
+.idea
+.DS_Store
+
+# git
+.git
+.gitignore
+
+# misc
+*.sqlite3
+instance
+dist
+build

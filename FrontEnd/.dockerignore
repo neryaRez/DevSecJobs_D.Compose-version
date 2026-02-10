@@ -1,0 +1,36 @@
+# deps
+node_modules
+.pnpm-store
+.yarn
+.yarn-cache
+.npm
+
+# build outputs
+dist
+build
+.vite
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# tooling / editors
+.vscode
+.idea
+.DS_Store
+
+# git
+.git
+.gitignore
+
+# misc
+coverage
+*.tgz

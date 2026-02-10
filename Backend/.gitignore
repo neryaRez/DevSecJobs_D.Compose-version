@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.build/
+dist/
+build/
+.mypy_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Editors / IDE
+.vscode/
+.idea/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Secrets / Env
+.env
+.env.*
+*.secret
+*.key
+
+# SQLite databases
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Flask instance data (שומרים את התיקייה, מתעלמים מהתוכן)
+instance/*
+!instance/.gitkeep
+
+# Uploads (אם יש; שומרים תיקייה ריקה עם .gitkeep)
+files/resumes/*
+!files/resumes/.gitkeep
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+*.log
+logs/

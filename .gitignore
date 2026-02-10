@@ -1,0 +1,135 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+build/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Flask instance data (keep folder, ignore contents)
+instance/*
+!instance/.gitkeep
+
+# Uploads (keep empty folders with .gitkeep)
+uploads/*
+!uploads/.gitkeep
+files/resumes/*
+!files/resumes/.gitkeep
+
+# =========================
+# Databases / Dumps
+# =========================
+*.sql
+*.dump
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# Secrets / Env
+# =========================
+.env
+.env.*
+*.secret
+*.key
+
+# =========================
+# Node / React / Vite (Monorepo friendly)
+# =========================
+**/node_modules/
+**/dist/
+dist-ssr/
+.vite/
+*.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Package manager locks (choose what you want to commit)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# =========================
+# Editors / IDE
+# =========================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Generated / Local build artifacts
+# =========================
+output.css
+
+# =========================
+# Backups only (NOT real json)
+# =========================
+*.json.backup
+*.json.old
+*.json~
+*.backup
+
+
+# =========================
+# Terraform
+# =========================
+
+# Terraform working directory (providers, modules cache)
+.terraform/
+**/.terraform/
+
+# Terraform state files (לא לשמור בגיט!)
+*.tfstate
+*.tfstate.*
+
+# Terraform plan files
+*.tfplan
+
+# Terraform CLI config (מקומי בלבד)
+.terraformrc
+terraform.rc
+
+# Override files (debug / local only)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+merge_all.py
+merged_all.txt

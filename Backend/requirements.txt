@@ -1,0 +1,12 @@
+flask
+flask-cors
+flask-jwt-extended
+requests
+pyjwt
+pymysql
+flask-sqlalchemy
+flask-migrate
+flask-bcrypt
+sqlalchemy
+python-dotenv
+cryptography
