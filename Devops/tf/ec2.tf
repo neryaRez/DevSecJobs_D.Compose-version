@@ -12,10 +12,10 @@ data "aws_ami" "ubuntu" {
 }
 
 locals {
-    user_data = templatefile("${path.module}/user_data.sh", {
-    aws_region = var.aws_region
-    account_id = var.account_id
-    project_name = var.project_name
+  user_data = templatefile("${path.module}/user_data.sh", {
+    AWS_REGION   = var.aws_region
+    ACCOUNT_ID   = var.account_id
+    PROJECT_NAME = var.project_name
   })
 
 }

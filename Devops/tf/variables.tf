@@ -27,7 +27,7 @@ variable "account_id" {
 }
 
 variable "mysql_database" { type = string }
-variable "mysql_user"     { type = string }
+variable "mysql_user" { type = string }
 
 variable "mysql_password" {
   type      = string
