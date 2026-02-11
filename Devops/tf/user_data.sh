@@ -144,7 +144,7 @@ if [ -z "$JWT_SECRET_KEY" ] || [ "$JWT_SECRET_KEY" = "DUMMY_JWT_SECRET" ]; then
   JWT_SECRET_KEY="$VERIFY"
 fi
 
-echo "JWT secret length: ${#JWT_SECRET_KEY}"
+echo "JWT secret length: $(echo -n "$JWT_SECRET_KEY" | wc -c)"
 
 EC2_PUBLIC_IP="$(get_public_ip)"
 CORS_ORIGINS="http://$EC2_PUBLIC_IP"
