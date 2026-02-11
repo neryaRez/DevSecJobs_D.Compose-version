@@ -27,13 +27,15 @@ resource "aws_iam_role_policy_attachment" "devsecjobs-ssm-attachment" {
 
 }
 
-data "aws_iam_policy_document" "devsecjobs_param_read" {
+data "aws_iam_policy_document" "devsecjobs_param_read_write" {
   statement {
     effect = "Allow"
     actions = [
       "ssm:GetParameter",
       "ssm:GetParameters",
-      "ssm:GetParametersByPath"
+      "ssm:GetParametersByPath",
+      "ssm:GetParameterHistory",
+      "ssm:PutParameter"
     ]
     resources = [
       "arn:aws:ssm:${var.aws_region}:${var.account_id}:parameter/${var.project_name}/*"
@@ -41,8 +43,8 @@ data "aws_iam_policy_document" "devsecjobs_param_read" {
   }
 }
 
-resource "aws_iam_role_policy" "devsecjobs_param_read" {
-  name   = "${var.project_name}-param-read"
+resource "aws_iam_role_policy" "devsecjobs_param_read_write" {
+  name   = "${var.project_name}-param-read_write"
   role   = aws_iam_role.devsecjobs-role.id
-  policy = data.aws_iam_policy_document.devsecjobs_param_read.json
+  policy = data.aws_iam_policy_document.devsecjobs_param_read_write.json
 }

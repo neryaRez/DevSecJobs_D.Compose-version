@@ -32,7 +32,12 @@ resource "aws_instance" "devsecjobs-ec2" {
   subnet_id              = aws_subnet.public_devsecjobs.id
   vpc_security_group_ids = [aws_security_group.devsecjobs-sg.id]
   iam_instance_profile   = aws_iam_instance_profile.devsecjobs_profile.name
-  depends_on             = [aws_ecr_repository.repositories]
+  depends_on             = [aws_ecr_repository.repositories,
+                             aws_ssm_parameter.mysql_database,
+                             aws_ssm_parameter.mysql_user,
+                             aws_ssm_parameter.mysql_password,
+                             aws_ssm_parameter.mysql_root_password,
+                             aws_ssm_parameter.jwt_secret_key]
   user_data              = local.user_data
   tags = {
     Name = "${var.project_name}-server"

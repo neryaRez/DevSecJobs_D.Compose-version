@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
-set -x
 
 LOG=/var/log/devsecjobs-bootstrap.log
 exec > >(tee -a "$LOG") 2>&1
+set -x
 
 echo "=== DevSecJobs bootstrap started ==="
 
@@ -108,21 +108,48 @@ ssm_get() {
 # Build .env from SSM
 echo "Creating .env from SSM Parameter Store..."
 
+# ---- DON'T LEAK SECRETS TO LOGS ----
+set +x
+
 MYSQL_DATABASE="$(ssm_get "/$PROJECT_NAME/MYSQL_DATABASE" "without")"
 MYSQL_USER="$(ssm_get "/$PROJECT_NAME/MYSQL_USER" "without")"
 MYSQL_PASSWORD="$(ssm_get "/$PROJECT_NAME/MYSQL_PASSWORD" "with")"
 MYSQL_ROOT_PASSWORD="$(ssm_get "/$PROJECT_NAME/MYSQL_ROOT_PASSWORD" "with")"
 
-JWT_SECRET_KEY="$(aws ssm get-parameter --with-decryption --name "/$PROJECT_NAME/JWT_SECRET_KEY" \
-  --query "Parameter.Value" --output text --region "$AWS_REGION" 2>/dev/null || true)"
+JWT_PARAM="/$PROJECT_NAME/JWT_SECRET_KEY"
 
-if [ -z "$JWT_SECRET_KEY" ] || [ "$JWT_SECRET_KEY" = "PUT_A_REAL_SECRET_HERE" ]; then
+# Use the retry helper for JWT too (more consistent)
+JWT_SECRET_KEY="$(ssm_get "$JWT_PARAM" "with")"
+
+# If dummy/missing -> generate, store to SSM, and verify immediately
+if [ -z "$JWT_SECRET_KEY" ] || [ "$JWT_SECRET_KEY" = "DUMMY_JWT_SECRET" ]; then
+  echo "JWT secret is missing/dummy -> generating and storing in SSM..."
   JWT_SECRET_KEY="$(openssl rand -hex 32)"
+
+  aws ssm put-parameter \
+    --name "$JWT_PARAM" \
+    --type "SecureString" \
+    --value "$JWT_SECRET_KEY" \
+    --overwrite \
+    --region "$AWS_REGION"
+
+  VERIFY="$(aws ssm get-parameter --with-decryption --name "$JWT_PARAM" \
+  --query "Parameter.Value" --output text --region "$AWS_REGION")"
+
+  if [ -z "$VERIFY" ] || [ "$VERIFY" = "DUMMY_JWT_SECRET" ]; then
+    echo "ERROR: JWT secret was not updated in SSM"
+    exit 1
+  fi
+
+  JWT_SECRET_KEY="$VERIFY"
 fi
+
+echo "JWT secret length: ${#JWT_SECRET_KEY}"
 
 EC2_PUBLIC_IP="$(get_public_ip)"
 CORS_ORIGINS="http://$EC2_PUBLIC_IP"
 
+# Create .env WITHOUT printing values
 cat > .env <<EOF
 AWS_REGION=$AWS_REGION
 ACCOUNT_ID=$ACCOUNT_ID
@@ -139,6 +166,10 @@ EOF
 
 chmod 600 .env
 echo ".env created."
+
+# Turn xtrace back on for non-secret parts
+set -x
+# ---- END SECRET SECTION ----
 
 echo "Waiting for images in ECR..."
 

@@ -25,5 +25,10 @@ resource "aws_ssm_parameter" "mysql_root_password" {
 resource "aws_ssm_parameter" "jwt_secret_key" {
   name  = "/${var.project_name}/JWT_SECRET_KEY"
   type  = "SecureString"
-  value = var.jwt_secret_key
+  value = "DUMMY_JWT_SECRET"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
+
