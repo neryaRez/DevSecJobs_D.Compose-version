@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+set -x
 
 LOG=/var/log/devsecjobs-bootstrap.log
 exec > >(tee -a "$LOG") 2>&1
@@ -19,7 +20,12 @@ echo "PROJECT_NAME=$PROJECT_NAME"
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y ca-certificates curl gnupg lsb-release git awscli openssl
+apt-get install -y ca-certificates curl gnupg lsb-release git unzip openssl
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+unzip -q awscliv2.zip
+./aws/install || true
+aws --version
 
 # Docker
 if ! command -v docker >/dev/null 2>&1; then
