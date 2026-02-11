@@ -1,0 +1,48 @@
+name: Build & Push (OIDC)
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ACCOUNT_ID: "455715798206"
+  FE_REPO: my-devsecjobs-project-frontend
+  BE_REPO: my-devsecjobs-project-backend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assume AWS role via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::455715798206:role/my-devsecjobs-project-github-actions-role
+          aws-region: us-east-1
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Tag = short commit sha
+        id: tag
+        run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Build & Push Frontend
+        run: |
+          FE_IMAGE="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FE_REPO}:${{ steps.tag.outputs.TAG }}"
+          docker build -t "$FE_IMAGE" ./FrontEnd
+          docker push "$FE_IMAGE"
+
+      - name: Build & Push Backend
+        run: |
+          BE_IMAGE="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BE_REPO}:${{ steps.tag.outputs.TAG }}"
+          docker build -t "$BE_IMAGE" ./BackEnd
+          docker push "$BE_IMAGE"
