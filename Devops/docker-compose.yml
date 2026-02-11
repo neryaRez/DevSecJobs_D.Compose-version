@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   frontend:
-    image: ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/devsecjobs-frontend:${APP_TAG}
+    image: ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/my-devsecjobs-project-frontend:${APP_TAG}
     ports:
       - "80:80"
     depends_on:
@@ -12,7 +12,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/devsecjobs-backend:${APP_TAG}
+    image: ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/my-devsecjobs-project-backend:${APP_TAG}
     environment:
       - DATABASE_URL=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}?charset=utf8mb4
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}

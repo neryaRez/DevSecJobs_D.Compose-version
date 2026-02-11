@@ -5,7 +5,7 @@ variable "aws_region" {
 
 variable "bucket_prefix" {
   type    = string
-  default = "devsecjobs-tfstate-nerya"
+  default = "devsecjobs-tfstate"
 }
 
 variable "dynamodb_table_name" {

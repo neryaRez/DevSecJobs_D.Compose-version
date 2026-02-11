@@ -5,10 +5,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.6"
-    }
   }
 }
 
@@ -16,13 +12,13 @@ provider "aws" {
   region = var.aws_region
 }
 
-resource "random_id" "suffix" {
-  byte_length = 4
-}
+
+data "aws_caller_identity" "current" {}
 
 locals {
-  bucket_name = "${var.bucket_prefix}-${random_id.suffix.hex}"
+  bucket_name = "devsecjobs-tfstate-${data.aws_caller_identity.current.account_id}"
 }
+
 
 resource "aws_s3_bucket" "tfstate" {
   bucket = local.bucket_name

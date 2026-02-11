@@ -45,5 +45,6 @@ resource "aws_instance" "devsecjobs-ec2" {
   metadata_options {
     http_tokens = "required"
   }
+  user_data_replace_on_change = true
 
 }
