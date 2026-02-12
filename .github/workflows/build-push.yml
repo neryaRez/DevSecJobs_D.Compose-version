@@ -44,5 +44,5 @@ jobs:
       - name: Build & Push Backend
         run: |
           BE_IMAGE="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BE_REPO}:${{ steps.tag.outputs.TAG }}"
-          docker build -t "$BE_IMAGE" ./BackEnd
+          docker build -t "$BE_IMAGE" ./Backend
           docker push "$BE_IMAGE"
