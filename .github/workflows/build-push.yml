@@ -8,10 +8,10 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: us-east-1
-  ACCOUNT_ID: "455715798206"
-  FE_REPO: my-devsecjobs-project-frontend
-  BE_REPO: my-devsecjobs-project-backend
+  AWS_REGION: ${{vars.AWS_REGION}}
+  ACCOUNT_ID: ${{vars.ACCOUNT_ID}}
+  FE_REPO: ${{vars.FE_REPO}}
+  BE_REPO: ${{vars.BE_REPO}}
 
 jobs:
   build:
@@ -19,13 +19,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Assume AWS role via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::455715798206:role/my-devsecjobs-project-github-actions-role
-          aws-region: us-east-1
+          role-to-assume: ${{vars.AWS_OIDC_ROLE_ARN}}
+          aws-region: ${{vars.AWS_REGION}}
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
