@@ -37,12 +37,18 @@ jobs:
 
       - name: Build & Push Frontend
         run: |
-          FE_IMAGE="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FE_REPO}:${{ steps.tag.outputs.TAG }}"
-          docker build -t "$FE_IMAGE" ./FrontEnd
-          docker push "$FE_IMAGE"
+          FE_SHA="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FE_REPO}:${{ steps.tag.outputs.TAG }}"
+          FE_LATEST="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FE_REPO}:latest"
+
+          docker build -t "$FE_SHA" -t "$FE_LATEST" ./FrontEnd
+          docker push "$FE_SHA"
+          docker push "$FE_LATEST"
 
       - name: Build & Push Backend
         run: |
-          BE_IMAGE="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BE_REPO}:${{ steps.tag.outputs.TAG }}"
-          docker build -t "$BE_IMAGE" ./Backend
-          docker push "$BE_IMAGE"
+          BE_SHA="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BE_REPO}:${{ steps.tag.outputs.TAG }}"
+          BE_LATEST="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BE_REPO}:latest"
+
+          docker build -t "$BE_SHA" -t "$BE_LATEST" ./Backend
+          docker push "$BE_SHA"
+          docker push "$BE_LATEST"
