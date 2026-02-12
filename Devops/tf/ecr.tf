@@ -9,7 +9,7 @@ resource "aws_ecr_repository" "repositories" {
   for_each = toset(local.repos)
 
   name                 = each.value
-  image_tag_mutability = "IMMUTABLE"
+  image_tag_mutability = "MMUTABLE"
   force_delete         = true
 
   image_scanning_configuration {
