@@ -2,7 +2,8 @@ name: Auto Update (SHA + latest)
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 permissions:
   id-token: write
@@ -13,46 +14,29 @@ env:
   ACCOUNT_ID: ${{ vars.ACCOUNT_ID }}
   FE_REPO: ${{ vars.FE_REPO }}
   BE_REPO: ${{ vars.BE_REPO }}
-  COMPOSE_DIR: /opt/devsecjobs/Devops
 
 jobs:
   detect-and-update:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout (full history for diff)
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Detect changes (robust)
+      - name: Detect changes
         id: changes
-        shell: bash
         run: |
-          BEFORE="${{ github.event.before }}"
-          AFTER="${{ github.sha }}"
+          git fetch origin main --depth=2
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
 
-          echo "BEFORE=$BEFORE"
-          echo "AFTER=$AFTER"
-
-          # In rare cases BEFORE can be all zeros (new branch). Fallback:
-          if [[ "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
-            BEFORE="$(git rev-list --max-parents=0 HEAD)"
-          fi
-
-          CHANGED="$(git diff --name-only "$BEFORE" "$AFTER" || true)"
           echo "$CHANGED"
 
-          if echo "$CHANGED" | grep -qE '^FrontEnd/'; then
-            echo "frontend=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "frontend=false" >> "$GITHUB_OUTPUT"
+          if echo "$CHANGED" | grep -q "^FrontEnd/"; then
+            echo "frontend=true" >> $GITHUB_OUTPUT
           fi
 
-          if echo "$CHANGED" | grep -qE '^Backend/'; then
-            echo "backend=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "backend=false" >> "$GITHUB_OUTPUT"
+          if echo "$CHANGED" | grep -q "^Backend/"; then
+            echo "backend=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Tag = short commit sha
@@ -90,7 +74,7 @@ jobs:
           docker build -t "$BE_SHA" -t "$BE_LATEST" ./Backend
           docker push "$BE_SHA"
           docker push "$BE_LATEST"
-
+      
       - name: Get runner public IP
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true'
         id: ip
@@ -100,9 +84,8 @@ jobs:
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true'
         run: |
           aws ec2 authorize-security-group-ingress \
-            --group-id "${{ vars.EC2_SG_ID }}" \
-            --ip-permissions "IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=${{ steps.ip.outputs.IP }}/32,Description=gha-temp-ssh}]" \
-          || true
+            --group-id ${{ vars.EC2_SG_ID }} \
+            --ip-permissions "IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=${{ steps.ip.outputs.IP }}/32,Description=gha-temp-ssh}]"|| true
 
       - name: SSH & Update Frontend (pull latest only)
         if: steps.changes.outputs.frontend == 'true'
@@ -112,9 +95,11 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ${{ env.COMPOSE_DIR }}
+            sudo chown ubuntu:ubuntu /opt/devsecjobs/Devops/.env || true
+            sudo chmod 600 /opt/devsecjobs/Devops/.env || true
+            cd /opt/devsecjobs/Devops
             docker compose pull frontend
-            docker compose up -d --no-deps frontend
+            docker compose up -d frontend
 
       - name: SSH & Update Backend (pull latest only)
         if: steps.changes.outputs.backend == 'true'
@@ -124,14 +109,18 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ${{ env.COMPOSE_DIR }}
+            sudo chown ubuntu:ubuntu /opt/devsecjobs/Devops/.env || true
+            sudo chmod 600 /opt/devsecjobs/Devops/.env || true
+            cd /opt/devsecjobs/Devops
             docker compose pull backend
-            docker compose up -d --no-deps backend
+            docker compose up -d backend
 
       - name: Revoke SSH from GitHub runner (cleanup)
         if: always() && (steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true')
         run: |
           aws ec2 revoke-security-group-ingress \
-            --group-id "${{ vars.EC2_SG_ID }}" \
+            --group-id ${{ vars.EC2_SG_ID }} \
             --ip-permissions "IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=${{ steps.ip.outputs.IP }}/32}]" \
           || true
+
+      
