@@ -1,0 +1,100 @@
+name: Auto Update (SHA + latest)
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ACCOUNT_ID: ${{ vars.ACCOUNT_ID }}
+  FE_REPO: ${{ vars.FE_REPO }}
+  BE_REPO: ${{ vars.BE_REPO }}
+
+jobs:
+  detect-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: changes
+        run: |
+          git fetch origin main --depth=2
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+
+          echo "$CHANGED"
+
+          if echo "$CHANGED" | grep -q "^FrontEnd/"; then
+            echo "frontend=true" >> $GITHUB_OUTPUT
+          fi
+
+          if echo "$CHANGED" | grep -q "^Backend/"; then
+            echo "backend=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Tag = short commit sha
+        if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true'
+        id: tag
+        run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS (OIDC)
+        if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to ECR
+        if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true'
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push Frontend (SHA + latest)
+        if: steps.changes.outputs.frontend == 'true'
+        run: |
+          FE_SHA="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FE_REPO}:${{ steps.tag.outputs.TAG }}"
+          FE_LATEST="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FE_REPO}:latest"
+
+          docker build -t "$FE_SHA" -t "$FE_LATEST" ./FrontEnd
+          docker push "$FE_SHA"
+          docker push "$FE_LATEST"
+
+      - name: Build & Push Backend (SHA + latest)
+        if: steps.changes.outputs.backend == 'true'
+        run: |
+          BE_SHA="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BE_REPO}:${{ steps.tag.outputs.TAG }}"
+          BE_LATEST="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BE_REPO}:latest"
+
+          docker build -t "$BE_SHA" -t "$BE_LATEST" ./Backend
+          docker push "$BE_SHA"
+          docker push "$BE_LATEST"
+
+      - name: SSH & Update Frontend (pull latest only)
+        if: steps.changes.outputs.frontend == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/Devops
+            docker compose pull frontend
+            docker compose up -d frontend
+
+      - name: SSH & Update Backend (pull latest only)
+        if: steps.changes.outputs.backend == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/Devops
+            docker compose pull backend
+            docker compose up -d backend
