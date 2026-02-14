@@ -95,7 +95,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/Devops
+            cd /home/ubuntu/DevSecJobs_D.Compose-version/Devops
             docker compose pull frontend
             docker compose up -d frontend
 
@@ -107,7 +107,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/Devops
+            cd /home/ubuntu/DevSecJobs_D.Compose-version/Devops
             docker compose pull backend
             docker compose up -d backend
 
