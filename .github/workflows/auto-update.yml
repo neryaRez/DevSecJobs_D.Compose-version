@@ -74,6 +74,18 @@ jobs:
           docker build -t "$BE_SHA" -t "$BE_LATEST" ./Backend
           docker push "$BE_SHA"
           docker push "$BE_LATEST"
+      
+      - name: Get runner public IP
+        if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true'
+        id: ip
+        run: echo "IP=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+
+      - name: Allow SSH from GitHub runner (temporary)
+        if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true'
+        run: |
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ vars.EC2_SG_ID }} \
+            --ip-permissions "IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=${{ steps.ip.outputs.IP }}/32,Description=gha-temp-ssh}]"|| true
 
       - name: SSH & Update Frontend (pull latest only)
         if: steps.changes.outputs.frontend == 'true'
@@ -98,3 +110,13 @@ jobs:
             cd /home/ubuntu/Devops
             docker compose pull backend
             docker compose up -d backend
+
+      - name: Revoke SSH from GitHub runner (cleanup)
+        if: always() && (steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true')
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ vars.EC2_SG_ID }} \
+            --ip-permissions "IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=${{ steps.ip.outputs.IP }}/32}]" \
+          || true
+
+      

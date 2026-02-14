@@ -72,6 +72,33 @@ resource "aws_iam_role_policy" "github_ecr_push" {
   policy = data.aws_iam_policy_document.github_ecr_push.json
 }
 
+data "aws_iam_policy_document" "github_sg_temp_ssh" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ec2:AuthorizeSecurityGroupIngress",
+      "ec2:RevokeSecurityGroupIngress"
+    ]
+
+    resources = [
+      "arn:aws:ec2:${var.aws_region}:${var.account_id}:security-group/sg-0e8e89f30f3d24f87"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = ["ec2:DescribeSecurityGroups"]
+    resources = ["*"]
+
+  }
+}
+
+resource "aws_iam_role_policy" "github_sg_temp_ssh" {
+  name   = "${var.project_name}-github-temp-ssh"
+  role   = aws_iam_role.github_actions_role.id
+  policy = data.aws_iam_policy_document.github_sg_temp_ssh.json
+}
+
+
 output "github_actions_role_arn" {
   value = aws_iam_role.github_actions_role.arn
 }
