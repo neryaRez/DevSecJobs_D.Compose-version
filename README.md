@@ -94,8 +94,10 @@ No hardcoded secrets exist in the repository.
 
 ### Temporary CI/CD SSH Access
 
-During deployment: 1. GitHub runner IP is detected 2. Temporarily
-allowed in the EC2 Security Group 3. Revoked after deployment
+During deployment:
+ 1. GitHub runner IP is detected.
+ 2. Temporarily allowed in the EC2 Security Group.
+ 3. Revoked after deployment
 
 ------------------------------------------------------------------------
 
@@ -158,15 +160,15 @@ Infrastructure is fully parameterized via Terraform.
 
 ### Landing Page
 
-![Landing Page](images/landing.png)
+![Landing Page](docs/images/landing.png)
 
 ### Candidate Dashboard
 
-![Candidate Area](images/candidate.png)
+![Candidate Area](docs/images/candidate.png)
 
 ### Manager Dashboard
 
-![Manager Area](images/manager.png)
+![Manager Area](docs/images/manager.png)
 
 ------------------------------------------------------------------------
 
@@ -188,17 +190,6 @@ Infrastructure is fully parameterized via Terraform.
 -   Auto Scaling Group
 -   Blue/Green deployment strategy
 -   Centralized logging & monitoring
-
-------------------------------------------------------------------------
-
-## 📄 Professional Summary (For CV)
-
-Designed and implemented a secure cloud-native recruitment platform
-using Terraform, AWS, Docker, and GitHub Actions.\
-Built a full CI/CD pipeline using OIDC federation (no static
-credentials), dynamic secret provisioning via AWS SSM, automated EC2
-bootstrap, and Docker Compose deployment with SHA-based image
-versioning.
 
 ------------------------------------------------------------------------
 
