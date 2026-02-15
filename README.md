@@ -9,7 +9,7 @@ orchestration, and cloud-native deployment.
 
 ------------------------------------------------------------------------
 
-## 🌍 Live Demo
+## Live Demo
 
 **Public Deployment:**\
 http://3.85.124.172/
@@ -18,18 +18,18 @@ Deployed on AWS EC2 using Docker Compose with secure CI/CD automation.
 
 ------------------------------------------------------------------------
 
-## 🧠 Platform Overview
+## Platform Overview
 
 DevSecJobs is a role-based recruitment system.
 
-### 👤 Candidate Area
+### Candidate Area
 
 -   Build and manage professional profile\
 -   Browse job feed\
 -   Apply to positions\
 -   Track match score and application status
 
-### 🧑‍💼 Manager Area
+### Manager Area
 
 -   Create and manage job postings\
 -   Review job applications\
@@ -38,7 +38,7 @@ DevSecJobs is a role-based recruitment system.
 
 ------------------------------------------------------------------------
 
-## 🏗 Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -75,7 +75,7 @@ DevSecJobs is a role-based recruitment system.
 
 ------------------------------------------------------------------------
 
-## 🔐 Security Architecture
+## Security Architecture
 
 ### OIDC Instead of Static AWS Credentials
 
@@ -101,7 +101,7 @@ During deployment:
 
 ------------------------------------------------------------------------
 
-## 🔁 CI/CD Workflow
+## CI/CD Workflow
 
 ### Build & Push
 
@@ -123,7 +123,7 @@ All deployments are traceable via commit SHA tagging.
 
 ------------------------------------------------------------------------
 
-## ☁ Infrastructure Design
+## Infrastructure Design
 
 Infrastructure is fully parameterized via Terraform.
 
@@ -136,7 +136,7 @@ Infrastructure is fully parameterized via Terraform.
 
 ------------------------------------------------------------------------
 
-## 🖥 Architecture Flow
+## Architecture Flow
 
     Developer Push
           ↓
@@ -156,7 +156,7 @@ Infrastructure is fully parameterized via Terraform.
 
 ------------------------------------------------------------------------
 
-## 🎨 Application Screenshots
+## Application-UI
 
 ### Landing Page
 
@@ -172,7 +172,7 @@ Infrastructure is fully parameterized via Terraform.
 
 ------------------------------------------------------------------------
 
-## 📌 Design Decisions
+## Design Decisions
 
 -   Docker Compose chosen for simplicity and clarity
 -   OIDC for secure GitHub integration
@@ -183,7 +183,7 @@ Infrastructure is fully parameterized via Terraform.
 
 ------------------------------------------------------------------------
 
-## 🚀 Future Enhancements
+## Future Enhancements
 
 -   Custom domain + HTTPS
 -   Application Load Balancer
@@ -193,7 +193,7 @@ Infrastructure is fully parameterized via Terraform.
 
 ------------------------------------------------------------------------
 
-## 👨‍💻 Author
+## Author
 
 DevSecJobs was built as a DevOps portfolio project to demonstrate
 production-level infrastructure thinking, secure automation, and cloud
