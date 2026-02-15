@@ -183,6 +183,92 @@ Infrastructure is fully parameterized via Terraform.
 
 ------------------------------------------------------------------------
 
+## Quick Start - Manual Deployment Guide
+
+This section allows a new user to deploy the full infrastructure and application with minimal effort.
+
+### 1. Deploy Terraform Remote Backend (One-Time)
+
+cd tf-state-backend  
+terraform init  
+terraform apply  
+
+---
+
+### 2. Deploy Infrastructure
+
+cd ../tf  
+cp secrets.tfvars.example secrets.auto.tfvars  
+
+Edit `secrets.auto.tfvars` and fill in:
+
+- account_id  
+- key_pair_name  
+- admin_cidr (YOUR_PUBLIC_IP/32)  
+- mysql_password  
+- mysql_root_password  
+
+Then run:
+
+chmod +x init.sh  
+./init.sh  
+
+terraform init  
+terraform apply  
+
+This provisions:
+
+- EC2 instance  
+- IAM roles  
+- OIDC trust for GitHub  
+- Amazon ECR repositories  
+- SSM Parameter Store secrets  
+- Security Groups
+
+After deployment completes, note the EC2 public IP from the Terraform output.
+
+---
+
+### 3. Configure GitHub Repository Variables
+
+Add the following **Repository Variables**:
+
+- AWS_REGION  
+- ACCOUNT_ID  
+- FE_REPO  
+- BE_REPO  
+- AWS_OIDC_ROLE_ARN  
+- EC2_SG_ID  
+
+Add the following **Repository Secrets**:
+
+- EC2_HOST  
+- EC2_SSH_KEY  
+
+(No AWS keys required — OIDC is used.)
+
+---
+
+### 4. Trigger Initial Build
+
+Push to `main` branch  
+or manually trigger:
+
+.github/workflows/build-push.yml  
+
+This builds and pushes Docker images to ECR.
+
+---
+
+### 5. Access the Application
+
+Open in browser:
+
+http://<EC2_PUBLIC_IP>/
+
+------------------------------------------------------------------------
+
+
 ## Future Enhancements
 
 -   Custom domain + HTTPS
