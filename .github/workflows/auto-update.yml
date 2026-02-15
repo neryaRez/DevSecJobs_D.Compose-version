@@ -2,8 +2,7 @@ name: Auto Update (SHA + latest)
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 permissions:
   id-token: write
@@ -22,13 +21,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Detect changes
         id: changes
         run: |
-          git fetch origin main --depth=2
-          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          echo "frontend=false" >> $GITHUB_OUTPUT
+          echo "backend=false" >> $GITHUB_OUTPUT
 
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+
+          echo "Diff range: $BEFORE..$AFTER"
+          CHANGED=$(git diff --name-only "$BEFORE" "$AFTER")
           echo "$CHANGED"
 
           if echo "$CHANGED" | grep -q "^FrontEnd/"; then
@@ -74,7 +80,7 @@ jobs:
           docker build -t "$BE_SHA" -t "$BE_LATEST" ./Backend
           docker push "$BE_SHA"
           docker push "$BE_LATEST"
-      
+
       - name: Get runner public IP
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true'
         id: ip
@@ -85,9 +91,10 @@ jobs:
         run: |
           aws ec2 authorize-security-group-ingress \
             --group-id ${{ vars.EC2_SG_ID }} \
-            --ip-permissions "IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=${{ steps.ip.outputs.IP }}/32,Description=gha-temp-ssh}]"|| true
+            --ip-permissions "IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=${{ steps.ip.outputs.IP }}/32,Description=gha-temp-ssh}]" \
+          || true
 
-      - name: SSH & Update Frontend (pull latest only)
+      - name: SSH & Update Frontend
         if: steps.changes.outputs.frontend == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -95,13 +102,18 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo chown ubuntu:ubuntu /opt/devsecjobs/Devops/.env || true
-            sudo chmod 600 /opt/devsecjobs/Devops/.env || true
+            export AWS_REGION="${{ vars.AWS_REGION }}"
+            export ACCOUNT_ID="${{ vars.ACCOUNT_ID }}"
+            ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+            aws ecr get-login-password --region "$AWS_REGION" \
+              | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
             cd /opt/devsecjobs/Devops
             docker compose pull frontend
-            docker compose up -d frontend
+            docker compose up -d --no-deps --force-recreate frontend
 
-      - name: SSH & Update Backend (pull latest only)
+      - name: SSH & Update Backend
         if: steps.changes.outputs.backend == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -109,11 +121,16 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo chown ubuntu:ubuntu /opt/devsecjobs/Devops/.env || true
-            sudo chmod 600 /opt/devsecjobs/Devops/.env || true
+            export AWS_REGION="${{ vars.AWS_REGION }}"
+            export ACCOUNT_ID="${{ vars.ACCOUNT_ID }}"
+            ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+            aws ecr get-login-password --region "$AWS_REGION" \
+              | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
             cd /opt/devsecjobs/Devops
             docker compose pull backend
-            docker compose up -d backend
+            docker compose up -d --no-deps --force-recreate backend
 
       - name: Revoke SSH from GitHub runner (cleanup)
         if: always() && (steps.changes.outputs.frontend == 'true' || steps.changes.outputs.backend == 'true')
@@ -122,5 +139,3 @@ jobs:
             --group-id ${{ vars.EC2_SG_ID }} \
             --ip-permissions "IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=${{ steps.ip.outputs.IP }}/32}]" \
           || true
-
-      
