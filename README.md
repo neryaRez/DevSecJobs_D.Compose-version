@@ -24,16 +24,16 @@ DevSecJobs is a role-based recruitment system.
 
 ### Candidate Area
 
--   Build and manage professional profile\
--   Browse job feed\
--   Apply to positions\
+-   Build and manage professional profile
+-   Browse job feed
+-   Apply to positions
 -   Track match score and application status
 
 ### Manager Area
 
--   Create and manage job postings\
--   Review job applications\
--   Browse candidate pool\
+-   Create and manage job postings
+-   Review job applications
+-   Browse candidate pool
 -   Evaluate match scores
 
 ------------------------------------------------------------------------
