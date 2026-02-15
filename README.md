@@ -1,4 +1,4 @@
-# DevSecJobs --- Cloud-Native DevOps Recruitment Platform
+# DevSecJobs — Cloud-Native DevOps Recruitment Platform
 
 DevSecJobs is a production-style full-stack recruitment platform
 designed specifically for **DevOps, Cloud, and Security professionals**.
